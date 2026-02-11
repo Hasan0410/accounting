@@ -1,0 +1,249 @@
+{% extends 'accounting/base.html' %}
+
+{% block page_title %}Financial Overview{% endblock %}
+
+{% block extra_css %}
+<style>
+    .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .metric-card {
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .metric-title {
+        color: var(--text-light);
+        font-size: 0.875rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .metric-value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--text-dark);
+    }
+
+    .metric-trend {
+        font-size: 0.875rem;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .trend-up {
+        color: #10b981;
+    }
+
+    .trend-down {
+        color: #ef4444;
+    }
+
+    .chart-container {
+        margin-bottom: 2rem;
+    }
+
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="metrics-grid">
+    <div class="card metric-card">
+        <div class="metric-title">Total Assets</div>
+        <div class="metric-value">${{ total_assets|floatformat:2 }}</div>
+        <div class="metric-trend trend-up">
+            <i class="fas fa-arrow-up"></i> 12% vs last month
+        </div>
+    </div>
+    <div class="card metric-card">
+        <div class="metric-title">Current Liabilities</div>
+        <div class="metric-value">${{ total_liabilities|floatformat:2 }}</div>
+        <div class="metric-trend trend-down">
+            <i class="fas fa-arrow-up"></i> 5% vs last month
+        </div>
+    </div>
+    <div class="card metric-card">
+        <div class="metric-title">Monthly Revenue</div>
+        <div class="metric-value">${{ monthly_revenue|floatformat:2 }}</div>
+        <div class="metric-trend trend-up">
+            <i class="fas fa-arrow-up"></i> 8.2% vs last month
+        </div>
+    </div>
+    <div class="card metric-card">
+        <div class="metric-title">Net Income</div>
+        <div class="metric-value {% if net_income >= 0 %}trend-up{% else %}trend-down{% endif %}">
+            ${{ net_income|floatformat:2 }}
+        </div>
+        <div class="metric-trend">
+            This Month
+        </div>
+    </div>
+</div>
+
+<div class="grid-2" style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem;">
+    <div class="card chart-container">
+        <div class="section-title">
+            <i class="fas fa-chart-line" style="color: var(--primary)"></i>
+            Revenue vs Expenses
+        </div>
+        <canvas id="mainChart" height="150"></canvas>
+    </div>
+
+    <div class="card">
+        <div class="section-title">
+            <i class="fas fa-balance-scale" style="color: var(--primary)"></i>
+            Equity
+        </div>
+        <div style="margin-top: 2rem; text-align: center;">
+            <div style="font-size: 3rem; font-weight: 800; color: var(--primary);">
+                ${{ total_equity|floatformat:2 }}
+            </div>
+            <p style="color: var(--text-light); margin-top: 0.5rem;">Total Shareholder Equity</p>
+
+            <div style="margin-top: 2rem; display: flex; flex-direction: column; gap: 1rem; text-align: left;">
+                <div style="display: flex; justify-content: space-between;">
+                    <span>Assets</span>
+                    <span style="font-weight: 600;">${{ total_assets|floatformat:2 }}</span>
+                </div>
+                <div style="height: 4px; background: #eee; border-radius: 2px; overflow: hidden;">
+                    <div style="width: 100%; height: 100%; background: var(--primary);"></div>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span>Liabilities</span>
+                    <span style="font-weight: 600;">${{ total_liabilities|floatformat:2 }}</span>
+                </div>
+                <div style="height: 4px; background: #eee; border-radius: 2px; overflow: hidden;">
+                    <div style="width: 70%; height: 100%; background: #fbbf24;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card" style="margin-top: 1.5rem;">
+    <div class="section-title">
+        <i class="fas fa-bolt" style="color: #fbbf24"></i>
+        Quick Actions & Recent Activity
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem; margin-top: 1rem;">
+        <div style="display: flex; flex-direction: column; gap: 0.8rem;">
+            <a href="{% url 'add_transaction' %}" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                <i class="fas fa-plus"></i> New Journal Entry
+            </a>
+            <a href="{% url 'profit_loss' %}" class="btn"
+                style="width: 100%; background: #f1f5f9; color: var(--text-dark); justify-content: center;">
+                <i class="fas fa-file-invoice-dollar"></i> Generate P&L
+            </a>
+            <a href="{% url 'audit_logs' %}" class="btn"
+                style="width: 100%; background: #f1f5f9; color: var(--text-dark); justify-content: center;">
+                <i class="fas fa-history"></i> System Activity
+            </a>
+        </div>
+        <div>
+            <table style="margin-top: 0; font-size: 0.875rem;">
+                <thead style="background: transparent;">
+                    <tr>
+                        <th style="padding: 8px 0;">Entry</th>
+                        <th style="padding: 8px 0;">Description</th>
+                        <th style="padding: 8px 0; text-align: right;">Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tx in recent_transactions %}
+                    <tr>
+                        <td style="padding: 10px 0; font-weight: 600;">#{{ tx.id }}</td>
+                        <td style="padding: 10px 0;">{{ tx.description|truncatechars:30 }}</td>
+                        <td style="padding: 10px 0; text-align: right; color: var(--text-light);">{{ tx.date|date:"M d"
+                            }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" style="text-align: center; padding: 20px;">No recent entries.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const ctx = document.getElementById('mainChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ chart_labels| safe }},
+        datasets: [
+        {
+            label: 'Revenue',
+            data: {{ revenue_data| safe }},
+        borderColor: '#6366f1',
+        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+        fill: true,
+        tension: 0.4,
+        borderWidth: 3,
+        pointRadius: 4,
+        pointBackgroundColor: '#6366f1'
+                },
+        {
+            label: 'Expenses',
+            data: {{ expense_data| safe }},
+        borderColor: '#f43f5e',
+        backgroundColor: 'rgba(244, 63, 94, 0.1)',
+        fill: true,
+        tension: 0.4,
+        borderWidth: 3,
+        pointRadius: 4,
+        pointBackgroundColor: '#f43f5e'
+                }
+    ]
+        },
+        options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'top',
+                labels: {
+                    usePointStyle: true,
+                    padding: 20,
+                    font: { family: 'Outfit', size: 12 }
+                }
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                grid: { color: '#f1f5f9' },
+                ticks: { font: { family: 'Outfit' } }
+            },
+            x: {
+                grid: { display: false },
+                ticks: { font: { family: 'Outfit' } }
+            }
+        },
+        interaction: {
+            intersect: false,
+            mode: 'index',
+        }
+    }
+    });
+</script>
+{% endblock %}

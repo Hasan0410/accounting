@@ -1,0 +1,81 @@
+{% extends 'accounting/base.html' %}
+
+{% block page_title %}Profit & Loss Statement{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 900px; margin: 0 auto;">
+    <div
+        style="text-align: center; margin-bottom: 3rem; border-bottom: 2px solid var(--border); padding-bottom: 1.5rem;">
+        <h2 style="font-weight: 800; color: var(--text-dark); letter-spacing: -1px;">Income Statement</h2>
+        <p
+            style="color: var(--text-light); text-transform: uppercase; font-size: 0.875rem; font-weight: 600; margin-top: 0.5rem;">
+            For the Year ending December 31, {{ year }}
+        </p>
+    </div>
+
+    <!-- Revenue Section -->
+    <div style="margin-bottom: 2.5rem;">
+        <h3
+            style="color: var(--primary); font-size: 1.1rem; text-transform: uppercase; font-weight: 700; margin-bottom: 1rem; display: flex; align-items: center; gap: 10px;">
+            <i class="fas fa-arrow-trend-up"></i> Operating Revenue
+        </h3>
+        <table style="margin-top: 0;">
+            <tbody>
+                {% for acc in revenue_accounts %}
+                <tr>
+                    <td>{{ acc.name }}</td>
+                    <td style="text-align: right; font-weight: 500;">${{ acc.current_balance|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+                <tr style="background: #f8fafc; font-weight: 700;">
+                    <td>Total Revenue</td>
+                    <td style="text-align: right; border-top: 2px solid var(--text-dark);">${{
+                        total_revenue|floatformat:2 }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Expense Section -->
+    <div style="margin-bottom: 2.5rem;">
+        <h3
+            style="color: #f43f5e; font-size: 1.1rem; text-transform: uppercase; font-weight: 700; margin-bottom: 1rem; display: flex; align-items: center; gap: 10px;">
+            <i class="fas fa-arrow-trend-down"></i> Operating Expenses
+        </h3>
+        <table style="margin-top: 0;">
+            <tbody>
+                {% for acc in expense_accounts %}
+                <tr>
+                    <td>{{ acc.name }}</td>
+                    <td style="text-align: right; font-weight: 500;">${{ acc.current_balance|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+                <tr style="background: #f8fafc; font-weight: 700;">
+                    <td>Total Expenses</td>
+                    <td style="text-align: right; border-top: 1px solid var(--border);">${{ total_expense|floatformat:2
+                        }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Net Income Summary -->
+    <div
+        style="background: var(--primary); color: white; padding: 2rem; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow-lg);">
+        <div>
+            <div style="font-size: 0.875rem; opacity: 0.9; text-transform: uppercase; font-weight: 600;">Net Profit
+                (Loss)</div>
+            <div style="font-size: 2.5rem; font-weight: 800;">${{ net_profit|floatformat:2 }}</div>
+        </div>
+        <div style="font-size: 3rem; opacity: 0.2;">
+            <i class="fas fa-coins"></i>
+        </div>
+    </div>
+</div>
+
+<div style="text-align: center; margin-top: 2rem;">
+    <button onclick="window.print()" class="btn" style="background: #1e293b; color: white;">
+        <i class="fas fa-print"></i> Export to PDF / Print
+    </button>
+</div>
+{% endblock %}

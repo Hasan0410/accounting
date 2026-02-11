@@ -1,0 +1,48 @@
+{% extends 'accounting/base.html' %}
+
+{% block page_title %}System Audit Logs{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <div>
+            <h3 style="font-size: 1.25rem; font-weight: 700;">Audit Trail</h3>
+            <p style="color: var(--text-light); font-size: 0.875rem;">Security and activity monitoring</p>
+        </div>
+        <div>
+            <span class="badge badge-primary">{{ logs.count }} Total Actions Recorded</span>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Timestamp</th>
+                <th>User</th>
+                <th>Action</th>
+                <th>Details</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in logs %}
+            <tr>
+                <td style="color: var(--text-light); font-size: 0.875rem;">{{ log.timestamp|date:"M d, Y H:i:s" }}</td>
+                <td>
+                    <div style="font-weight: 600;">{{ log.user.username }}</div>
+                    <div style="font-size: 0.75rem; color: var(--primary);">{{ log.user.profile.role }}</div>
+                </td>
+                <td>
+                    <span class="badge" style="background: #f1f5f9; color: var(--text-dark);">{{ log.action }}</span>
+                </td>
+                <td style="font-size: 0.9rem;">{{ log.details }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" style="text-align: center; padding: 2rem; color: var(--text-light);">No activity logs
+                    found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
